@@ -1,4 +1,4 @@
-name: Investing Scraper
+name: Investing Scraper Low Volume
 on:
   schedule:
     - cron: '0 0 * * *' # Runs daily at midnight
