@@ -133,7 +133,7 @@ def scrape_ticker_with_cycling(ticker_slug, from_date_str, max_pages=1000, batch
 if __name__ == "__main__":
     TICKER_FILE = "tickers.txt"
     # Process only 1 new ticker per workflow run to stay well under 6hrs
-    MAX_TO_PROCESS = 1 
+    MAX_TO_PROCESS = 2 
     processed_this_run = 0
 
     if os.path.exists(TICKER_FILE):
