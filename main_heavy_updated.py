@@ -156,7 +156,7 @@ if __name__ == "__main__":
             
             # If we reach here, it's a new ticker
             print(f"\n[!] Target Found: {t}. Starting scrape...")
-            scrape_ticker_with_cycling(t, "2026-03-04")
+            scrape_ticker_with_cycling(t, "2025-04-01")
             processed_this_run += 1
             
         if processed_this_run == 0:

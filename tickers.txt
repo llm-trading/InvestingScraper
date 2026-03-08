@@ -1,1 +1,7 @@
 nvidia-corp
+adv-micro-device
+palantir-technologies-inc
+amazon-com-inc
+eliem-therapeutics
+northrop-grumman
+micron-tech
