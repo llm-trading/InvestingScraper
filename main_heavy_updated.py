@@ -22,11 +22,11 @@ def scrape_ticker_with_cycling(ticker_slug, from_date_str, max_pages=1000, batch
 
     os.makedirs("data", exist_ok=True)
     
-    # Check for existing data
-    existing_files = [f for f in os.listdir("data") if f.startswith(f"{ticker_slug}_")]
-    if existing_files:
-        print(f"[-] SKIPPING: {ticker_slug} (Found existing file: {existing_files[0]})")
-        return
+    # # Check for existing data
+    # existing_files = [f for f in os.listdir("data") if f.startswith(f"{ticker_slug}_")]
+    # if existing_files:
+    #     print(f"[-] SKIPPING: {ticker_slug} (Found existing file: {existing_files[0]})")
+    #     return
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M")
     filename = f"data/{ticker_slug}_{timestamp}.csv"
@@ -88,10 +88,17 @@ def scrape_ticker_with_cycling(ticker_slug, from_date_str, max_pages=1000, batch
                                 break
 
                             title_el = art.find_element('css selector', '[data-test="article-title-link"]')
+
+                            source = "N/A"
+                            try:
+                                source_el = art.find_element('css selector', '[data-test="article-provider-link"]')
+                                source = source_el.text.strip()
+                            except: pass
+
                             page_articles.append({
                                 "title": title_el.text.strip(),
                                 "link": title_el.get_attribute("href"),
-                                "source": "N/A",
+                                "source": source,
                                 "time": raw_time,
                                 "type": "Pro" if "/news/pro/" in title_el.get_attribute("href") else "Free"
                             })
@@ -125,12 +132,34 @@ def scrape_ticker_with_cycling(ticker_slug, from_date_str, max_pages=1000, batch
 
 if __name__ == "__main__":
     TICKER_FILE = "tickers.txt"
+    # Process only 1 new ticker per workflow run to stay well under 6hrs
+    MAX_TO_PROCESS = 1 
+    processed_this_run = 0
+
     if os.path.exists(TICKER_FILE):
         with open(TICKER_FILE, "r") as f:
             tickers = [line.strip() for line in f if line.strip()]
         
-        print(f"Found {len(tickers)} tickers in queue.")
+        print(f"[*] Queue total: {len(tickers)} tickers.\n{tickers}")
+        
         for t in tickers:
-            scrape_ticker_with_cycling(t, "2025-04-01")
+            if processed_this_run >= MAX_TO_PROCESS:
+                break
+            
+            # FAST CHECK: Does data for this ticker exist?
+            os.makedirs("data", exist_ok=True)
+            already_scraped = any(f.startswith(f"{t}_") for f in os.listdir("data"))
+            
+            if already_scraped:
+                print(f"[-] {t}: Already exists in /data. Checking next...")
+                continue
+            
+            # If we reach here, it's a new ticker
+            print(f"\n[!] Target Found: {t}. Starting scrape...")
+            scrape_ticker_with_cycling(t, "2026-03-04")
+            processed_this_run += 1
+            
+        if processed_this_run == 0:
+            print("[✓] All tickers in list have been processed. Nothing to do!")
     else:
         print(f"!!! Error: {TICKER_FILE} not found.")
